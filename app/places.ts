@@ -1,0 +1,11 @@
+export type Place={id:string;name:string;category:string;description:string;lat:number;lng:number;price:string;tag:string;open:boolean;approved:boolean};
+export const region={center:[40.939,38.231] as [number,number],bounds:[[40.916,38.185],[40.96,38.28]] as [[number,number],[number,number]],zoom:15};
+export const categories=[{id:'all',name:'Hepsi',color:'#326953',bg:'#e4f4e8'},{id:'food',name:'Yeme içme',color:'#b9542a',bg:'#ffeadb'},{id:'party',name:'Partiler',color:'#8543b1',bg:'#f0e5fc'},{id:'taxi',name:'Taksiler',color:'#956d05',bg:'#fff2bf'},{id:'walk',name:'Yürüyüş',color:'#277357',bg:'#dff2df'},{id:'fun',name:'Eğlence',color:'#bf416d',bg:'#fce1eb'}];
+export const initialPlaces:Place[]=[
+{id:'1',name:'Sahil Kahve',category:'food',lat:40.9421,lng:38.229,price:'₺₺',tag:'KAHVE MOLASI',description:'Deniz havası, taze kahve ve uzun sohbetler. Sahilde hayalî bir buluşma noktası.',open:true,approved:true},
+{id:'2',name:'Gün Batımı Sessions',category:'party',lat:40.9431,lng:38.237,price:'₺₺',tag:'BU AKŞAM · 20.00',description:'Sahil ritimleriyle örnek bir açık hava DJ etkinliği. Program ve konum demo amaçlıdır.',open:false,approved:true},
+{id:'3',name:'Karadeniz Sofrası',category:'food',lat:40.9378,lng:38.228,price:'₺₺',tag:'YEREL LEZZETLER',description:'Karadeniz mutfağından yöresel yemekler sunan örnek lokanta.',open:true,approved:true},
+{id:'4',name:'Sahil Yürüyüşü',category:'walk',lat:40.943,lng:38.221,price:'Ücretsiz',tag:'TEMİZ HAVA · ÖRNEK ROTA',description:'Sahilde yaklaşık 1,5 km uzunluğunda örnek yürüyüş çizgisi. Geçilebilirlik doğrulanmamıştır; navigasyon değildir.',open:true,approved:true},
+{id:'5',name:'Meydan Taksi',category:'taxi',lat:40.9387,lng:38.2329,price:'Taksimetre',tag:'BİR YERE Mİ GİDİYORSUN?',description:'Taksi duraklarının nasıl görüneceğini gösteren örnek kayıt. Çağrı hizmeti değildir.',open:true,approved:true},
+{id:'6',name:'Renkli Sahne',category:'fun',lat:40.9355,lng:38.2374,price:'₺₺',tag:'MÜZİK & ARKADAŞLAR',description:'Canlı müzik ve arkadaşlarla keyifli akşamlar için hayalî bir mekân.',open:false,approved:true},
+{id:'7',name:'Park Buluşması',category:'fun',lat:40.9394,lng:38.2186,price:'Ücretsiz',tag:'BİRLİKTE DAHA GÜZEL',description:'Mahalle sakinlerinin bir araya geldiği örnek açık hava buluşması.',open:true,approved:true}];
