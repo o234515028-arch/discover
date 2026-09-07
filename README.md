@@ -1,6 +1,6 @@
-# Koh Rong Keşif
+# discover.
 
-Kamboçya'daki Koh Rong adası için hazırlanmış, mobil öncelikli bir harita ve yerel keşif uygulaması prototipi. Ana ekran tamamen haritadır; açılır menüden yeme içme yerleri, partiler, ada içi ulaşım, yürüyüş rotaları ve eğlence noktaları filtrelenebilir.
+**discover.**, Kamboçya'daki Koh Rong adası için hazırlanmış, mobil öncelikli bir harita ve yerel keşif uygulaması prototipidir. Ana ekran tamamen haritadır; açılır menüden yeme içme yerleri, partiler, ada içi ulaşım, yürüyüş rotaları ve eğlence noktaları filtrelenebilir.
 
 ## Özellikler
 
@@ -21,8 +21,8 @@ Kamboçya'daki Koh Rong adası için hazırlanmış, mobil öncelikli bir harita
 Node.js 22.13 veya daha yeni bir sürüm gerekir.
 
 ```bash
-git clone https://github.com/o234515028-arch/koh-rong-kesif.git
-cd koh-rong-kesif
+git clone https://github.com/o234515028-arch/discover.git
+cd discover
 npm ci
 npm run dev
 ```

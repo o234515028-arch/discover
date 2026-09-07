@@ -63,7 +63,9 @@ export default function Page() {
     [notice, setNotice] = useState('');
   useEffect(() => {
     try {
-      const s = JSON.parse(localStorage.getItem('koh-rong-v1') || '{}');
+      const s = JSON.parse(
+        localStorage.getItem('discover-koh-rong-v1') || '{}',
+      );
       if (
         Array.isArray(s.places) &&
         s.places.every(
@@ -82,7 +84,7 @@ export default function Page() {
     if (ready)
       try {
         localStorage.setItem(
-          'koh-rong-v1',
+          'discover-koh-rong-v1',
           JSON.stringify({ places, favorites, messages }),
         );
       } catch {
@@ -165,7 +167,7 @@ export default function Page() {
               <span className="brand-icon">
                 <MapPin size={25} />
               </span>
-              koh rong<span className="brand-tail">’da</span>
+              discover<span className="brand-tail">.</span>
               <span className="beta">BETA</span>
             </a>
             <SheetClose
@@ -217,7 +219,7 @@ export default function Page() {
                 </button>
               ))}
               <div className="rail-bottom">
-                <span className="tiny-logo">b.</span>
+                <span className="tiny-logo">d.</span>
                 <span>
                   Burada,
                   <br />

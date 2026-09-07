@@ -33,7 +33,7 @@ import {
   type TrackPoint,
   type WalkRoute,
 } from './route-utils';
-const STORAGE = 'koh-rong-walks-v1';
+const STORAGE = 'discover-koh-rong-walks-v1';
 export default function WalkMap(props: {
   places: Place[];
   onSelect: (p: Place) => void;

@@ -81,5 +81,5 @@ const escapeXML = (s: string) =>
       })[c]!,
   );
 export function toGPX(route: WalkRoute) {
-  return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="KohRongKesif" xmlns="http://www.topografix.com/GPX/1/1"><trk><name>${escapeXML(route.name)}</name><trkseg>${route.points.map((p) => `<trkpt lat="${p.lat}" lon="${p.lng}">${route.mode === 'gps' ? `<time>${new Date(p.t).toISOString()}</time>` : ''}</trkpt>`).join('')}</trkseg></trk></gpx>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<gpx version="1.1" creator="discover." xmlns="http://www.topografix.com/GPX/1/1"><trk><name>${escapeXML(route.name)}</name><trkseg>${route.points.map((p) => `<trkpt lat="${p.lat}" lon="${p.lng}">${route.mode === 'gps' ? `<time>${new Date(p.t).toISOString()}</time>` : ''}</trkpt>`).join('')}</trkseg></trk></gpx>`;
 }

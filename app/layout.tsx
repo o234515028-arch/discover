@@ -7,7 +7,7 @@ export const viewport: Viewport = {
   themeColor: '#306e50',
 };
 export const metadata: Metadata = {
-  title: 'Koh Rong’da — Adayı keşfet',
+  title: 'discover. — Koh Rong’u keşfet',
   description:
     'Kamboçya’daki Koh Rong adası için yerler, etkinlikler, yürüyüş rotaları ve sohbetler.',
   icons: { icon: '/favicon.svg' },
