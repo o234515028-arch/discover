@@ -71,7 +71,7 @@ export const initialPlaces: Place[] = [
     name: 'Koh Toch–Longset Yürüyüşü',
     category: 'walk',
     lat: 10.6748,
-    lng: 103.2865,
+    lng: 103.2778,
     price: 'Ücretsiz',
     tag: 'SAHİL · ÖRNEK ROTA',
     description:

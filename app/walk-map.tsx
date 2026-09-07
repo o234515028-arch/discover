@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import MapView from './map-view';
 import type { Place } from './places';
+import { isInsideKohRong } from './koh-rong-boundary';
 import {
   acceptGPS,
   totalDistance,
@@ -192,6 +193,14 @@ export default function WalkMap(props: {
             !Number.isFinite(accuracy)
           )
             return;
+          if (!isInsideKohRong(lat, lng)) {
+            setLocation(null);
+            setExpanded(true);
+            setStatus(
+              'Konumun Koh Rong adasının dışında. Harita yalnızca adayı gösterir.',
+            );
+            return;
+          }
           setLocation({ lat, lng, accuracy });
           if (first) {
             setFocus((f) => f + 1);

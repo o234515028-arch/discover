@@ -39,7 +39,8 @@ import {
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import MapView from './walk-map';
-import { categories, initialPlaces, type Place, region } from './places';
+import { categories, initialPlaces, type Place } from './places';
+import { isInsideKohRong } from './koh-rong-boundary';
 const icons = [Compass, Utensils, Music, Car, Footprints, Coffee];
 export default function Page() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -116,10 +117,7 @@ export default function Page() {
     if (
       !Number.isFinite(lat) ||
       !Number.isFinite(lng) ||
-      lat < region.bounds[0][0] ||
-      lat > region.bounds[1][0] ||
-      lng < region.bounds[0][1] ||
-      lng > region.bounds[1][1]
+      !isInsideKohRong(lat, lng)
     ) {
       setNotice('Konum Koh Rong geliştirme alanı içinde olmalı.');
       return;

@@ -5,6 +5,29 @@ import 'leaflet/dist/leaflet.css';
 import { LocateFixed, Plus, Minus } from 'lucide-react';
 import type { TrackPoint } from './route-utils';
 import { categories, region, type Place } from './places';
+import { isInsideKohRong, kohRongBoundary } from './koh-rong-boundary';
+
+const worldBoundary: [number, number][] = [
+  [-85, -180],
+  [-85, 180],
+  [85, 180],
+  [85, -180],
+  [-85, -180],
+];
+
+function applyIslandLimit(map: Leaflet.Map, reset = false) {
+  map.invalidateSize({ animate: false, pan: false });
+  map.setMinZoom(0);
+  const minimumZoom = Math.max(11, map.getBoundsZoom(region.bounds));
+  map.setMaxBounds(region.bounds);
+  map.setMinZoom(minimumZoom);
+  if (reset || map.getZoom() < minimumZoom) {
+    map.setView(region.center, minimumZoom, { animate: false });
+  } else {
+    map.panInsideBounds(region.bounds, { animate: false });
+  }
+}
+
 // Provider adapter: other application components use provider-independent Place coordinates.
 export default function MapView({
   places,
@@ -28,7 +51,9 @@ export default function MapView({
   const routeLayer = useRef<Leaflet.LayerGroup | null>(null),
     locationLayer = useRef<Leaflet.LayerGroup | null>(null),
     drawRef = useRef(drawing),
-    clickRef = useRef(onRoutePoint);
+    clickRef = useRef(onRoutePoint),
+    appliedLocationFocus = useRef(0),
+    appliedRouteFocus = useRef(0);
   drawRef.current = drawing;
   clickRef.current = onRoutePoint;
   const container = useRef<HTMLDivElement>(null),
@@ -40,18 +65,18 @@ export default function MapView({
   useEffect(() => {
     let disposed = false;
     let observer: ResizeObserver | undefined;
+    let resizeFrame = 0;
     import('leaflet')
       .then((L) => {
         if (disposed || !container.current) return;
         lib.current = L;
         const m = L.map(container.current, {
           zoomControl: false,
-          minZoom: 10,
+          minZoom: 0,
           maxZoom: 18,
           maxBounds: region.bounds,
           maxBoundsViscosity: 1,
-        });
-        m.fitBounds(region.bounds, { padding: [18, 18], maxZoom: region.zoom });
+        }).setView(region.center, region.zoom);
         map.current = m;
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
           attribution:
@@ -61,19 +86,36 @@ export default function MapView({
           .on('tileerror', () => setError(true))
           .on('tileload', () => setError(false))
           .addTo(m);
+        const maskPane = m.createPane('island-mask');
+        maskPane.style.zIndex = '350';
+        maskPane.style.pointerEvents = 'none';
+        L.polygon([worldBoundary, kohRongBoundary], {
+          pane: 'island-mask',
+          stroke: false,
+          fillColor: '#aad3df',
+          fillOpacity: 1,
+          fillRule: 'evenodd',
+          interactive: false,
+        }).addTo(m);
         layer.current = L.layerGroup().addTo(m);
         routeLayer.current = L.layerGroup().addTo(m);
         locationLayer.current = L.layerGroup().addTo(m);
         m.on('click', (e: Leaflet.LeafletMouseEvent) => {
-          if (drawRef.current) clickRef.current?.(e.latlng.lat, e.latlng.lng);
+          if (drawRef.current && isInsideKohRong(e.latlng.lat, e.latlng.lng))
+            clickRef.current?.(e.latlng.lat, e.latlng.lng);
         });
+        applyIslandLimit(m, true);
         setLoaded(true);
-        observer = new ResizeObserver(() => m.invalidateSize());
+        observer = new ResizeObserver(() => {
+          cancelAnimationFrame(resizeFrame);
+          resizeFrame = requestAnimationFrame(() => applyIslandLimit(m));
+        });
         observer.observe(container.current);
       })
       .catch(() => setError(true));
     return () => {
       disposed = true;
+      cancelAnimationFrame(resizeFrame);
       observer?.disconnect();
       map.current?.remove();
       map.current = null;
@@ -84,6 +126,7 @@ export default function MapView({
     const L = lib.current;
     layer.current.clearLayers();
     for (const p of drawing ? [] : places) {
+      if (!isInsideKohRong(p.lat, p.lng)) continue;
       const c = categories.find((c) => c.id === p.category)!;
       const node = document.createElement('div');
       node.className = 'map-pin';
@@ -116,8 +159,8 @@ export default function MapView({
         L.polyline(
           [
             [10.6660696, 103.272748],
-            [10.6693, 103.2776],
-            [10.6739, 103.2816],
+            [10.6693, 103.2758],
+            [10.6739, 103.2775],
             [10.67973, 103.2817709],
           ],
           { color: '#33855e', weight: 5, dashArray: '7 8' },
@@ -128,7 +171,7 @@ export default function MapView({
     if (!loaded || !lib.current || !locationLayer.current) return;
     const L = lib.current;
     locationLayer.current.clearLayers();
-    if (userLocation) {
+    if (userLocation && isInsideKohRong(userLocation.lat, userLocation.lng)) {
       const pos: [number, number] = [userLocation.lat, userLocation.lng];
       L.circle(pos, {
         radius: userLocation.accuracy,
@@ -152,14 +195,20 @@ export default function MapView({
     if (!loaded || !lib.current || !routeLayer.current) return;
     const L = lib.current;
     routeLayer.current.clearLayers();
-    if (routePoints.length) {
+    const visibleRoutePoints = routePoints.filter((p) =>
+      isInsideKohRong(p.lat, p.lng),
+    );
+    if (visibleRoutePoints.length) {
       L.polyline(
-        routePoints.map((p) => [p.lat, p.lng] as [number, number]),
+        visibleRoutePoints.map((p) => [p.lat, p.lng] as [number, number]),
         { color: '#286ddd', weight: 5, interactive: false },
       ).addTo(routeLayer.current);
       const ends = drawing
-        ? routePoints
-        : [routePoints[0], routePoints[routePoints.length - 1]];
+        ? visibleRoutePoints
+        : [
+            visibleRoutePoints[0],
+            visibleRoutePoints[visibleRoutePoints.length - 1],
+          ];
       for (const p of ends)
         L.circleMarker([p.lat, p.lng], {
           radius: 5,
@@ -174,19 +223,29 @@ export default function MapView({
   }, [loaded, routePoints, drawing]);
   useEffect(() => {
     if (!loaded || !map.current || !userLocation || !focusLocation) return;
-    map.current.setMaxBounds(undefined);
-    map.current.setMinZoom(3);
-    map.current.setView([userLocation.lat, userLocation.lng], 16);
-  }, [loaded, focusLocation]);
+    if (appliedLocationFocus.current === focusLocation) return;
+    appliedLocationFocus.current = focusLocation;
+    if (!isInsideKohRong(userLocation.lat, userLocation.lng)) return;
+    applyIslandLimit(map.current);
+    map.current.setView(
+      [userLocation.lat, userLocation.lng],
+      Math.max(16, map.current.getMinZoom()),
+    );
+  }, [loaded, focusLocation, userLocation]);
   useEffect(() => {
     if (!loaded || !map.current || !routePoints.length || !focusRoute) return;
-    map.current.setMaxBounds(undefined);
-    map.current.setMinZoom(3);
+    if (appliedRouteFocus.current === focusRoute) return;
+    appliedRouteFocus.current = focusRoute;
+    const visibleRoutePoints = routePoints.filter((p) =>
+      isInsideKohRong(p.lat, p.lng),
+    );
+    if (!visibleRoutePoints.length) return;
+    applyIslandLimit(map.current);
     map.current.fitBounds(
-      routePoints.map((p) => [p.lat, p.lng] as [number, number]),
+      visibleRoutePoints.map((p) => [p.lat, p.lng] as [number, number]),
       { paddingTopLeft: [40, 80], paddingBottomRight: [60, 200], maxZoom: 16 },
     );
-  }, [loaded, focusRoute]);
+  }, [loaded, focusRoute, routePoints]);
   return (
     <>
       <div ref={container} className="leaflet-surface" />
@@ -204,14 +263,7 @@ export default function MapView({
         </button>
         <button
           aria-label="Koh Rong adasına dön"
-          onClick={() => {
-            map.current?.setMaxBounds(region.bounds);
-            map.current?.setMinZoom(10);
-            map.current?.fitBounds(region.bounds, {
-              padding: [18, 18],
-              maxZoom: region.zoom,
-            });
-          }}
+          onClick={() => map.current && applyIslandLimit(map.current, true)}
         >
           <LocateFixed size={20} />
         </button>
